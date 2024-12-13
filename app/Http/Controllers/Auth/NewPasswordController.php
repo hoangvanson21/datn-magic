@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class NewPasswordController extends Controller
         return Inertia::render('Auth/ResetPassword', [
             'email' => $request->email,
             'token' => $request->route('token'),
+            'isReset' => true,
         ]);
     }
 
@@ -34,36 +36,63 @@ class NewPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        // Kiểm tra trạng thái của isReset
+        $isReset = $request->input('isReset', false);
+
+        // Xác định quy tắc validate dựa trên trạng thái của isReset
+        $validationRules = [
             'token' => 'required',
             'email' => 'required|email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        ];
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
-
-                event(new PasswordReset($user));
-            }
-        );
-
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        if ($status == Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', __($status));
+        if (!$isReset) {
+            $validationRules['old_password'] = 'required';
         }
 
-        throw ValidationException::withMessages([
-            'email' => [trans($status)],
-        ]);
+        // Thực hiện validate
+        $request->validate($validationRules);
+
+        // Nếu là reset mật khẩu, không kiểm tra mật khẩu cũ
+        if ($isReset) {
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user) use ($request) {
+                    // Cập nhật mật khẩu người dùng
+                    $user->forceFill([
+                        'password' => Hash::make($request->password),
+                        'remember_token' => Str::random(60),
+                    ])->save();
+
+                    event(new PasswordReset($user));
+                }
+            );
+
+            if ($status == Password::PASSWORD_RESET) {
+                return redirect()->route('login')->with('status', __($status));
+            }
+
+            // Nếu có lỗi, ném ra thông báo lỗi
+            throw ValidationException::withMessages([
+                'email' => [trans($status)],
+            ]);
+        } else {
+            // Đổi mật khẩu yêu cầu kiểm tra mật khẩu cũ
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->old_password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'old_password' => ['Mật khẩu cũ không đúng'],
+                ]);
+            }
+
+            // Cập nhật mật khẩu người dùng
+            $user->forceFill([
+                'password' => Hash::make($request->password),
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            return redirect()->route('login')->with('status', 'Đổi mật khẩu thành công');
+        }
     }
 }

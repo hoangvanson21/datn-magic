@@ -31,14 +31,14 @@ const CateProducts = ({ data }) => {
                 ) : (
                     <div className="all-products-section w-full py-8">
                         <h2 className="text-5xl font-extrabold text-white my-6 text-center">
-                            Tất cả thương hiệu
+                            Tất cả danh mục
                         </h2>
                         {data.brands.length > 0 ? (
                             data.brands.map((brand) => (
                                 <div key={brand.id} className="brand-section my-8 bg-white bg-opacity-90 rounded-lg shadow-md p-6">
                                     <h3 className="text-4xl font-semibold text-green-800 flex items-center mb-4">
                                         <TagsOutlined className="mr-2 text-4xl" />
-                                        Thương hiệu  {brand.name}
+                                        {brand.name}
                                     </h3>
                                     {brand.products.length > 0 ? (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

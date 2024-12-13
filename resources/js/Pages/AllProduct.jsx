@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Layout, Select, Checkbox, Slider, Button, Card, Row, Col, Typography, Tag } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Layout, Select, Checkbox, Slider, Button, Card, Row, Col, Typography } from 'antd';
 import { ShopOutlined, FilterOutlined, DollarOutlined, StarOutlined, ReloadOutlined } from '@ant-design/icons';
 import ProductCard from '@/Components/ProductCard';
 import PageTitle from './Layouts/TitlePage';
@@ -154,7 +154,7 @@ const ProductPage = ({ products = [], brands = [], categories = [] }) => {
                                     <span>{maxPrice}đ</span>
                                 </div>
                             </div>
-                            
+
                             <Button onClick={resetFilters} type="primary" icon={<ReloadOutlined />} className="w-full">
                                 Đặt lại bộ lọc
                             </Button>
@@ -169,6 +169,7 @@ const ProductPage = ({ products = [], brands = [], categories = [] }) => {
                                     display: 'flex',
                                     flexWrap: 'wrap',
                                     gap: '15px',
+                                    justifyContent: 'center', // Căn giữa các sản phẩm
                                 }}
                             >
                                 {filteredProducts.length > 0 ? (
@@ -183,6 +184,7 @@ const ProductPage = ({ products = [], brands = [], categories = [] }) => {
                                     </p>
                                 )}
                             </div>
+
                         </Card>
                     </Col>
                 </Row>

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Category;
+use App\Models\OrderUser;
+use App\Models\Product;
+use App\Models\Reviews;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -45,5 +49,28 @@ class AdminController extends Controller
         $user->save();
 
         return redirect()->route('admin.index')->with('success', 'Trạng thái người dùng đã được cập nhật.');
+    }
+
+    public function dashboard()
+    {
+        $totalView = Product::sum('view'); // Tính tổng lượt xem từ cột 'view' trong bảng 'products'
+        $totalBrand = Brand::count();
+        $totalUser = User::count();
+        $totalOrder = OrderUser::count();
+        $totalProduct = Product::count();
+        $totalCategory = Category::count();
+        $totalPrice = OrderUser::sum('total_amount');
+        $totalReview = Reviews::count();
+
+        return view('admin.index', compact(
+            'totalUser',
+            'totalOrder',
+            'totalProduct',
+            'totalCategory',
+            'totalPrice',
+            'totalReview',
+            'totalBrand',
+            'totalView' // Đảm bảo biến này được thêm vào
+        ));
     }
 }

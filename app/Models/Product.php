@@ -19,9 +19,10 @@ class Product extends Model
         'name',
         'description',
         'price',
+        'dis_price',
         'quantity',
         'brand_id',
-        'image',
+        'images',
         'status_id',
         'type_id',
         'discount_id',
@@ -30,7 +31,10 @@ class Product extends Model
         'options_id',
         'colors_id',
     ];
-
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -57,18 +61,21 @@ class Product extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function variants()
-    {
-        return $this->hasMany(ProductOptions::class);
-    }
+
     public function options()
     {
         return $this->belongsTo(Options::class);
+    }
+    public function colors()
+    {
+        return $this->belongsTo(Colors::class);
     }
     public function reviews()
     {
         return $this->hasMany(Reviews::class);
     }
-    public function ratings() { return $this->hasMany(Reviews::class);
-}
+    public function ratings()
+    {
+        return $this->hasMany(Reviews::class);
+    }
 }

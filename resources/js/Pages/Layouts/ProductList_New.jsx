@@ -10,7 +10,7 @@ const ProductList = ({ products_news }) => {
             <br />
             {/* New Products Section */}
             <div className="product__new flex items-center">
-                <h1 className="text-3xl font-bold text-red-600 mx-auto container">
+                <h1 className="text-3xl  text-red-600 mx-auto container">
                     SẢN PHẨM MỚI NHẤT
                 </h1>
             </div>
@@ -20,8 +20,8 @@ const ProductList = ({ products_news }) => {
                 <div className="product-list__body grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {products_news.length > 0 ? (
                         products_news.map((product) => (
-                            <div 
-                                key={product.id} 
+                            <div
+                                key={product.id}
                                 className="transform transition duration-300 hover:scale-105 hover:shadow-xl hover:bg-gray-50 hover:opacity-90 ease-in-out"
                             >
                                 <ProductCard product={product} />

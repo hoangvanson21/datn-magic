@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, InputNumber, Typography, Row, Col, Card, Image, Tag, Space, notification } from 'antd';
-
+import { Button, Typography, Row, Col, Card, Carousel, Tag, Space, notification } from 'antd';
 import '../../css/Details.css';
 import Comment from '@/Components/Comment';
 
@@ -9,234 +8,224 @@ const { Title, Text } = Typography;
 const ProductDetail = ({ productData }) => {
     const [product, setProduct] = useState(productData || {});
     const [quantity, setQuantity] = useState(1);
-    const [options, setOptions] = useState([]);
-    const [colors, setColors] = useState([]);
-    const [selectedOption, setSelectedOption] = useState(null);
-    const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedOptionId, setSelectedOptionId] = useState(null);
+    const [selectedColorId, setSelectedColorId] = useState(null);
     const [totalPrice, setTotalPrice] = useState(productData?.base_price || 0);
-    const [mainImage, setMainImage] = useState(productData?.image || '/default-image.jpg');
-    const [thumbnails, setThumbnails] = useState(productData?.thumbnails || []);
 
+    // Cập nhật product khi có dữ liệu mới
     useEffect(() => {
         if (productData) {
             setProduct(productData);
-            setMainImage(productData.image || '/default-image.jpg');
-            setThumbnails(productData.thumbnails || []);
-            if (productData.options) {
-                const optionsArray = Object.entries(productData.options).map(([key, value]) => ({
-                    id: key, ...value
-                }));
-                setOptions(optionsArray);
-            }
-            if (productData.colors) {
-                const colorsArray = Object.entries(productData.colors).map(([key, value]) => ({
-                    id: key, ...value
-                }));
-                setColors(colorsArray);
-            }
         }
     }, [productData]);
 
     useEffect(() => {
-        let newTotalPrice = product.base_price || 0;
-        if (selectedOption) {
-            newTotalPrice += parseFloat(selectedOption.price || 0);
-        }
-        if (selectedColor) {
-            newTotalPrice += parseFloat(selectedColor.price || 0);
-        }
-        setTotalPrice(newTotalPrice);
-    }, [selectedOption, selectedColor, product.base_price]);
+        const selectedVariant = product.variants?.find(
+            (variant) =>
+                variant.option?.id === selectedOptionId &&
+                variant.color?.id === selectedColorId
+        );
 
-    const handleQuantityChange = (value) => {
-        setQuantity(value);
-    };
+        let newTotalPrice = 0;
 
-    const handleOptionClick = (optionId) => {
-        const option = options.find((opt) => opt.id === optionId);
-        setSelectedOption(option);
-    };
-
-    const handleThumbnailClick = (image) => {
-        setMainImage(image);
-    };
-
-    const fetchThumbnailColor = async (colorId) => {
-        try {
-            const response = await fetch(`/api/colors/${colorId}/thumbnail`);
-            if (!response.ok) throw new Error('Failed to fetch color thumbnail');
-            const data = await response.json();
-            return data.thumbnail;
-        } catch (error) {
-            console.error('Error fetching color thumbnail:', error);
-            return null;
-        }
-    };
-
-    const handleColorClick = async (colorId) => {
-        const color = colors.find((col) => col.id === colorId);
-        setSelectedColor(color);
-        const fetchedThumbnails = await fetchThumbnailColor(colorId);
-        if (fetchedThumbnails && fetchedThumbnails.length > 0) {
-            setThumbnails(fetchedThumbnails.map(thumbnail => thumbnail.image_url));
-            setMainImage(fetchedThumbnails[0].image_url);
+        if (selectedVariant) {
+            newTotalPrice = selectedVariant.variant_price * quantity;
         } else {
-            setThumbnails([]);
-            setMainImage('/default-image.jpg');
+            newTotalPrice = product.base_price * quantity;
         }
+
+        setTotalPrice(newTotalPrice);
+
+    }, [selectedOptionId, selectedColorId, product.base_price, product.variants, quantity]);
+    const handleCheckout = () => {
+        // Create a payload with the current product and its details
+        const checkoutProduct = {
+            id: product.id,
+            name: product.name,
+            price: totalPrice,
+            quantity,
+            option: product.variants?.find(variant => variant.option.id === selectedOptionId)?.option,
+            color: product.variants?.find(variant => variant.color.id === selectedColorId)?.color,
+        };
+
+        // Check if the user has selected all necessary options (variant and color)
+        if (!checkoutProduct.option || !checkoutProduct.color) {
+            notification.warning({
+                message: 'Chọn đầy đủ thông tin',
+                description: 'Vui lòng chọn phiên bản và màu sắc trước khi tiếp tục.',
+            });
+            return;
+        }
+
+        // Store the checkout product in sessionStorage or state
+        sessionStorage.setItem('checkoutItems', JSON.stringify([checkoutProduct]));
+
+        // Redirect to the checkout page
+        window.location.href = `${window.location.origin}/checkout`;
     };
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // Thêm sản phẩm vào giỏ hàng
+    const handleAddToCart = async () => {
+        if (!selectedOptionId || !selectedColorId) {
+            notification.warning({
+                message: 'Chọn đầy đủ thông tin',
+                description: 'Vui lòng chọn phiên bản và màu sắc trước khi thêm vào giỏ hàng.',
+            });
+            return;
+        }
 
+        const payload = {
+            product_id: product.id,
+            option_id: selectedOptionId,
+            color_id: selectedColorId,
+            quantity,
+            price: totalPrice,
+        };
 
-    const fetchAddToCart = async ({ Product_ID, Option_ID, Color_ID, quantity, totalPrice }) => {
         try {
-            const response = await fetch('/products', {
+            const response = await fetch('/api/cart/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 },
-                body: JSON.stringify({
-                    Product_ID,
-                    Option_ID,
-                    Color_ID,
-                    quantity,
-                    totalPrice,
-                }),
+                body: JSON.stringify(payload),
             });
-            if (!response.ok) throw new Error('Failed to add to cart');
-            notification.success({
-                message: 'Thêm vào giỏ hàng thành công!',
-                description: `${product.name} đã được thêm vào giỏ hàng.`,
-                placement: 'topRight',
-            });
+
+            if (response.ok) {
+                const result = await response.json();
+                notification.success({
+                    message: 'Thành công!',
+                    description: result.success,
+                });
+            } else {
+                const error = await response.json();
+                notification.error({
+                    message: 'Thất bại',
+                    description: error.error || 'Không thể thêm vào giỏ hàng.',
+                });
+            }
         } catch (error) {
             notification.error({
-                message: 'Thêm vào giỏ hàng thất bại',
-                description: 'Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.',
-                placement: 'topRight',
+                message: 'Lỗi hệ thống',
+                description: 'Không thể kết nối tới máy chủ.',
             });
-            console.error('Error adding to cart:', error);
         }
     };
 
-    const handleAddToCart = () => {
-        fetchAddToCart({
-            Product_ID: product.id,
-            Option_ID: selectedOption?.id,
-            Color_ID: selectedColor?.id,
-            quantity,
-            totalPrice,
-        });
-    };
-
     return (
-        <>
-            <div className="container overflow-hidden">
-                <div className="mx-20 p-4">
-                    <div className="flex items-center gap-5 animate-bounce font-bold text-black">
-                        <h2 className='text-3xl'>{product.name}</h2>
-                        <div class="text-yellow-500 ">
-                            ★★★★★
-                        </div>
-                    </div>
-                    <Row gutter={[16, 16]}>
-                        <Col xs={24} md={12}>
-                            <Card hoverable className="flex h-full justify-center">
-                                <div className="overflow-hidden">
-                                    <Image
-                                        src={mainImage ? `/storage/${mainImage}` : '/default-image.jpg'}
-                                        alt={product.name || 'Default Product'}
-                                        className="block mx-auto  img__details object-cover rounded-lg shadow-lg"
-                                        preview={false}
+        <div className="container py-6">
+            <Row gutter={[16, 16]}>
+                {/* Hình ảnh sản phẩm */}
+                <Col xs={24} md={12}>
+                    <Card className="shadow-lg rounded-lg">
+                        <Carousel autoplay>
+                            {product.images?.map((image, index) => (
+                                <div key={index} className="product-carousel-item">
+                                    <img
+                                        src={`/storage/${image}`}
+                                        alt={product.name}
+                                        className="rounded-lg w-full h-[400px] object-cover"
                                     />
                                 </div>
-                            </Card>
-                            <Space className="mt-4 gap-2">
-                                {thumbnails.map((thumbnail, index) => (
-                                    <Card
-                                        key={index}
-                                        hoverable
-                                        cover={<img alt={`thumbnail-${index}`} src={`/storage/${thumbnail}`} className="w-10 h-10" />}
-                                        className="thumbnail-card"
-                                        onClick={() => handleThumbnailClick(thumbnail)}
-                                    />
-                                ))}
-                            </Space>
-                        </Col>
-                        <Col xs={24} md={12}>
-                            <div className="container flex flex-col">
-                                <Text className="text-lg font-bold text-red-600 mb-4">
-                                    Giá: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice * quantity || 0)}
+                            )) || (
+                                    <div className="flex items-center justify-center h-[400px] bg-gray-200">
+                                        <span>Không có ảnh</span>
+                                    </div>
+                                )}
+                        </Carousel>
+                    </Card>
+                </Col>
+
+                {/* Thông tin sản phẩm */}
+                <Col xs={24} md={12}>
+                    <div className="product-info flex flex-col gap-4">
+                        <Title level={2} className="text-black">{product.name}</Title>
+
+                        {/* Giá sản phẩm */}
+                        <div className="text-lg font-bold text-red-600 flex items-center">
+                            {product.dis_price && (
+                                <Text className="line-through text-gray-500 mr-2">
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.base_price)}
                                 </Text>
-                                <Text className="text-gray-600 mb-4">{product.description || 'Mô tả sản phẩm'}</Text>
-                            </div>
+                            )}
+                            <Text>
+                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
+                            </Text>
+                        </div>
 
-                            <div>
-                                <div className="product__options">
-                                    {options.map((option) => (
-                                        <Tag
-                                            key={option.id}
-                                            color={selectedOption === option ? 'blue' : 'default'}
-                                            className={` p-5 relative py-3 rounded-lg mr-2 cursor-pointer ${selectedOption === option ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'
-                                                }`}
-                                            onClick={() => handleOptionClick(option.id)}
-                                        >
-                                            {selectedOption === option && (
-                                                <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
-                                                    ✓
-                                                </div>
-                                            )}
-                                             <h2 className='text-sm text-black font-bold'>
-                                             {option.name}
-                                             </h2>
-                                            <p className='text-red-600'>{Number(option.price)} đ</p>
-                                        </Tag>
-                                    ))}
-                                </div>
-                            </div>
+                        {/* Tùy chọn RAM/ROM */}
+                        <div className="flex gap-2">
+                            {product.variants
+                                ?.map((variant) => variant.option)
+                                ?.filter((option, index, self) => self.findIndex(o => o.id === option.id) === index)
+                                ?.map((option) => (
+                                    <Tag
+                                        key={option.id}
+                                        color={selectedOptionId === option.id ? 'blue' : 'default'}
+                                        className="cursor-pointer"
+                                        onClick={() => setSelectedOptionId(option.id)}
+                                    >
+                                        {option.ram}GB / {option.rom}GB
+                                    </Tag>
+                                ))}
+                        </div>
 
-                            <div className="mt-5 flex  flex-col gap-2 product__colors mb-4">
-                               <h2 className='text-gray-800'>Chọn màu dưới đây: </h2>
-                                <div className="flex">
-                                    {colors.map((color) => (
-                                        <Tag
-                                            key={color.id}
-                                            color={selectedColor === color ? 'red' : 'default'}
-                                            className={`mr-2 cursor-pointer ${selectedColor === color ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
-                                            onClick={() => handleColorClick(color.id)}
-                                        >
-                                            {color.name}
-                                        </Tag>
-                                    ))}
-                                </div>
-                            </div>
+                        {/* Màu sắc */}
+                        <div className="flex gap-2">
+                            {product.variants
+                                ?.map((variant) => variant.color)
+                                ?.filter((color, index, self) => self.findIndex(c => c.id === color.id) === index)
+                                ?.map((color) => (
+                                    <Tag
+                                        key={color.id}
+                                        color={selectedColorId === color.id ? 'red' : 'default'}
+                                        className="cursor-pointer"
+                                        onClick={() => setSelectedColorId(color.id)}
+                                    >
+                                        {color.name}
+                                    </Tag>
+                                ))}
+                        </div>
 
-                            <div className="mb-4">
-                                <Text className="text-gray-700">Số lượng:</Text>
-                                <InputNumber
-                                    min={1}
-                                    value={quantity}
-                                    onChange={handleQuantityChange}
-                                    className="ml-2 w-16 border border-gray-300 rounded-md p-1"
-                                />
-                            </div>
+                        {/* Số lượng */}
+                        <div className="flex items-center gap-2">
+                            <Text className="font-semibold">Số lượng:</Text>
+                            <input
+                                type="number"
+                                min={1}
+                                value={quantity}
+                                onChange={(e) => setQuantity(Number(e.target.value))}
+                                className="border rounded-md px-2 py-1 w-20"
+                            />
+                        </div>
 
-                            <Button
-                                type="primary"
-                                className="mt-4 w-full"
-                                size="large"
-                                onClick={handleAddToCart}
-                            >
+                        {/* Nút hành động */}
+                        <Space direction="vertical" className="w-full">
+                            <Button type="primary" size="large" className="w-full" onClick={handleAddToCart}>
                                 Thêm vào giỏ hàng
                             </Button>
-                        </Col>
-                    </Row>
-                </div>
-                <Comment product={product} />
-            </div>
-        </>
+                            <Button onClick={handleCheckout} type="default" size="large" className="w-full">
+                                Mua ngay
+                            </Button>
+                        </Space>
+                    </div>
+                </Col>
+            </Row>
+
+            {/* Mô tả sản phẩm */}
+            <Row className="mt-8">
+                <Col span={24}>
+                    <Card className="shadow-sm">
+                        <Title level={4}>Mô tả sản phẩm</Title>
+                        <Text>{product.description || 'Thông tin sản phẩm đang được cập nhật.'}</Text>
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Bình luận */}
+            <Comment product={product} />
+        </div>
     );
 };
 

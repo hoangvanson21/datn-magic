@@ -17,10 +17,12 @@ const HeaderLayout = () => {
         window.location.href = `${window.location.origin}${url}`;
     };
 
- 
+
 
     const userMenu = (
         <Menu>
+            {user && user.status == 'admin' && (<Menu.Item key="admin"> <Link href={route('admin.index')}>Quản trị viên</Link> </Menu.Item>
+            )}
             <Menu.Item key="profile">
                 <Link href={route('profile.edit')}>Hồ sơ cá nhân</Link>
             </Menu.Item>
@@ -100,7 +102,13 @@ const HeaderLayout = () => {
                     </div>
 
                     <div className="flex items-center space-x-4 text-gray-400">
-                        <Button icon={<HeartOutlined />} shape="circle" className="text-gray-400 hover:text-red-400" />
+                        <Link href={route('wishlist')} className="cursor-pointer flex items-center">
+                            <Button
+                                icon={<HeartOutlined />}
+                                shape="circle"
+                                className="text-gray-400 hover:text-red-400"
+                            />
+                        </Link>
                         <CartCount />
                     </div>
                 </div>
@@ -129,7 +137,7 @@ const HeaderLayout = () => {
                         ) : (
                             <Dropdown overlay={userMenu} trigger={['click']}>
                                 <Button icon={<UserOutlined />} className="text-gray-700 hover:text-blue-400">
-                                    <span className="ml-2">{user.name}</span>
+                                    {/* <span className="ml-2">{user.name}</span> */}
                                 </Button>
                             </Dropdown>
                         )}

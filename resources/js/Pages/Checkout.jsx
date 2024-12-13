@@ -117,10 +117,7 @@ const Checkout = () => {
         // Chuyển hướng người dùng đến VNPay để thanh toán
         window.location.href = vnpayUrl;
       } else {
-        // Nếu thanh toán khi nhận hàng, không xóa giỏ hàng ngay
         message.success('Đặt hàng thành công!');
-
-        // Xóa giỏ hàng chỉ khi thanh toán thành công hoặc chọn COD
         setCart([]);
         sessionStorage.removeItem('checkoutItems');
       }

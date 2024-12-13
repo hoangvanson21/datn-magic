@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             Authen::class
         ]);
     })
+        
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

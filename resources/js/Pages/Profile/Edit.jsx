@@ -6,17 +6,17 @@ import { UserOutlined, MailOutlined, PhoneOutlined, HomeOutlined, EditOutlined, 
 export default function Dashboard() {
     const { props } = usePage();
     const user = props.auth.user;
+    const address = props.address; // Sử dụng đúng dữ liệu `address` từ props
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
-        id: user.id,
-        status: user.status,
         name: user.name,
         email: user.email,
-        created_at: user.created_at,
+        status: user.status,
+        phone: address?.phone || '', // Thêm dữ liệu địa chỉ vào formData
+        street: address?.street || '', // Thêm trường street vào formData
     });
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
-    const [orders, setOrders] = useState(props.orders || []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,13 +34,16 @@ export default function Dashboard() {
         }
 
         try {
-            const response = await postData("user/update", formData);
+            const response = await axios.patch(route('profile.update'), formData);
             if (response.status === 200) {
                 setSuccessMessage(response.data.message);
                 setError(null);
                 setIsEditing(false);
+
+                window.location.reload();
             }
         } catch (err) {
+            console.error('Error:', err);
             setError('Lỗi cập nhật thông tin.');
             setSuccessMessage(null);
         }
@@ -55,8 +58,11 @@ export default function Dashboard() {
                         {/* Sidebar */}
                         <div className="lg:w-1/3 mb-4 lg:mb-0">
                             <div className="bg-white shadow-lg rounded-lg mb-4 p-4 text-center">
-                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
-                                    className="rounded-full w-36 mx-auto mb-4" />
+                                <img
+                                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
+                                    alt="avatar"
+                                    className="rounded-full w-36 mx-auto mb-4"
+                                />
                                 <h5 className="text-xl font-semibold">{user.name}</h5>
                                 <p className="text-gray-500 mb-2">{user.email}</p>
                                 <p className="text-gray-400 mb-4">{user.status}</p>
@@ -105,26 +111,41 @@ export default function Dashboard() {
                                     </div>
                                     <hr />
 
-                                    {/* Other fields */}
+                                    {/* Phone */}
                                     <div className="flex justify-between items-center">
                                         <p className="font-semibold text-gray-700 flex items-center">
                                             <PhoneOutlined className="mr-2" /> Số điện thoại
                                         </p>
-                                        <p className="text-gray-500">(097) 234-5678</p>
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                name="phone"
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                                className="text-gray-500 p-2 border border-gray-300 rounded"
+                                            />
+                                        ) : (
+                                            <p className="text-gray-500">{address?.phone}</p>
+                                        )}
                                     </div>
                                     <hr />
-                                    <div className="flex justify-between items-center">
-                                        <p className="font-semibold text-gray-700 flex items-center">
-                                            <PhoneOutlined className="mr-2" /> Mobile
-                                        </p>
-                                        <p className="text-gray-500">(098) 765-4321</p>
-                                    </div>
-                                    <hr />
+
+                                    {/* Street */}
                                     <div className="flex justify-between items-center">
                                         <p className="font-semibold text-gray-700 flex items-center">
                                             <HomeOutlined className="mr-2" /> Địa chỉ
                                         </p>
-                                        <p className="text-gray-500">Bay Area, San Francisco, CA</p>
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                name="street"
+                                                value={formData.street}
+                                                onChange={handleChange}
+                                                className="text-gray-500 p-2 border border-gray-300 rounded"
+                                            />
+                                        ) : (
+                                            <p className="text-gray-500">{address?.street}</p>
+                                        )}
                                     </div>
 
                                     {/* Edit Button */}
@@ -145,13 +166,12 @@ export default function Dashboard() {
                                             </button>
                                         )}
                                     </div>
-
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-        </AuthenticatedLayout >
+        </AuthenticatedLayout>
     );
 }

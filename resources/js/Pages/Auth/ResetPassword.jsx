@@ -6,12 +6,12 @@ import axios from 'axios';
 
 const { Title } = Typography;
 
-export default function ResetPassword({ token, email }) {
+export default function ResetPassword({ token, email, isReset }) {
     const { data, setData, processing, errors, reset } = useForm({
         token: token,
         email: email,
         old_password: '',
-        new_password: '',
+        password: '',
         password_confirmation: '',
     });
 
@@ -21,15 +21,14 @@ export default function ResetPassword({ token, email }) {
             const response = await axios.post(route('new.password'), {
                 token: data.token,
                 email: data.email,
-                old_password: data.old_password,
-                new_password: data.new_password,
+                old_password: isReset ? null : data.old_password, // Nếu là reset, không gửi mật khẩu cũ
+                password: data.password,
                 password_confirmation: data.password_confirmation,
+                isReset: isReset,
             });
-            // Xử lý phản hồi thành công
             message.success(response.data.message);
-            reset('old_password', 'new_password', 'password_confirmation');
+            reset('old_password', 'password', 'password_confirmation');
         } catch (error) {
-            // Xử lý phản hồi lỗi
             if (error.response && error.response.data) {
                 message.error(error.response.data.message || 'Đã xảy ra lỗi');
             } else {
@@ -40,14 +39,16 @@ export default function ResetPassword({ token, email }) {
 
     return (
         <GuestLayout>
-            <Head title="Đặt Lại Mật Khẩu" />
+            <Head title={isReset ? 'Đặt lại mật khẩu' : 'Đổi mật khẩu'} />
             <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-                <Title level={2} className="text-center">Đặt Lại Mật Khẩu</Title>
+                <Title level={2} className="text-center">
+                    {isReset ? 'Đặt lại mật khẩu' : 'Đổi mật khẩu'}
+                </Title>
 
                 <Form layout="vertical" onSubmitCapture={submit}>
                     <Form.Item
                         label="Email"
-                        validateStatus={errors.email && "error"}
+                        validateStatus={errors.email && 'error'}
                         help={errors.email}
                     >
                         <Input
@@ -60,51 +61,91 @@ export default function ResetPassword({ token, email }) {
                         />
                     </Form.Item>
 
-                    <Form.Item
-                        label="Mật khẩu cũ"
-                        validateStatus={errors.old_password && "error"}
-                        help={errors.old_password}
-                    >
-                        <Input.Password
-                            prefix={<LockOutlined />}
-                            name="old_password"
-                            value={data.old_password}
-                            onChange={(e) => setData('old_password', e.target.value)}
-                            required
-                        />
-                    </Form.Item>
+                    {isReset ? (
+                        // Nếu là đặt lại mật khẩu, không yêu cầu mật khẩu cũ
+                        <>
+                            <Form.Item
+                                label="Mật khẩu mới"
+                                validateStatus={errors.password && 'error'}
+                                help={errors.password}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    name="password"
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    required
+                                />
+                            </Form.Item>
 
-                    <Form.Item
-                        label="Mật khẩu mới"
-                        validateStatus={errors.new_password && "error"}
-                        help={errors.new_password}
-                    >
-                        <Input.Password
-                            prefix={<LockOutlined />}
-                            name="new_password"
-                            value={data.new_password}
-                            onChange={(e) => setData('new_password', e.target.value)}
-                            required
-                        />
-                    </Form.Item>
+                            <Form.Item
+                                label="Xác nhận mật khẩu mới"
+                                validateStatus={errors.password_confirmation && 'error'}
+                                help={errors.password_confirmation}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    name="password_confirmation"
+                                    value={data.password_confirmation}
+                                    onChange={(e) =>
+                                        setData('password_confirmation', e.target.value)
+                                    }
+                                    required
+                                />
+                            </Form.Item>
+                        </>
+                    ) : (
+                        // Nếu là đổi mật khẩu, yêu cầu mật khẩu cũ
+                        <>
+                            <Form.Item
+                                label="Mật khẩu cũ"
+                                validateStatus={errors.old_password && 'error'}
+                                help={errors.old_password}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    name="old_password"
+                                    value={data.old_password}
+                                    onChange={(e) => setData('old_password', e.target.value)}
+                                    required
+                                />
+                            </Form.Item>
 
-                    <Form.Item
-                        label="Xác nhận mật khẩu mới"
-                        validateStatus={errors.password_confirmation && "error"}
-                        help={errors.password_confirmation}
-                    >
-                        <Input.Password
-                            prefix={<LockOutlined />}
-                            name="password_confirmation"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            required
-                        />
-                    </Form.Item>
+                            <Form.Item
+                                label="Mật khẩu mới"
+                                validateStatus={errors.password && 'error'}
+                                help={errors.password}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    name="password"
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    required
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Xác nhận mật khẩu mới"
+                                validateStatus={errors.password_confirmation && 'error'}
+                                help={errors.password_confirmation}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    name="password_confirmation"
+                                    value={data.password_confirmation}
+                                    onChange={(e) =>
+                                        setData('password_confirmation', e.target.value)
+                                    }
+                                    required
+                                />
+                            </Form.Item>
+                        </>
+                    )}
 
                     <Form.Item>
                         <Button type="primary" htmlType="submit" loading={processing}>
-                            Đặt Lại Mật Khẩu
+                            {isReset ? 'Đặt lại mật khẩu' : 'Đổi mật khẩu'}
                         </Button>
                     </Form.Item>
                 </Form>

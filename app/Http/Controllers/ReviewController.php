@@ -16,8 +16,8 @@ class ReviewController extends Controller
     {
         $review = Reviews::find($id);
         if ($review) {
-            // Nếu status là 1 (hiện), chuyển thành 0 (ẩn), ngược lại
-            $review->status = ($review->status == 1) ? 0 : 1;
+            // Nếu status là 0 (hiện), chuyển thành 1 (ẩn), ngược lại
+            $review->status = ($review->status == 0) ? 1 : 0;
             $review->save();
 
             return redirect()->route('admin.reviews.index')
@@ -40,7 +40,7 @@ class ReviewController extends Controller
         $request->validate([
             'review_text' => 'required|string',
             'rating' => 'required|integer|min:1|max:5',
-            'status' => 'required|in:0,1', // Trạng thái chỉ nhận giá trị 0 hoặc 1
+            'status' => 'required|in:0,1', 
         ]);
 
         $review = Reviews::findOrFail($id); // Tìm review theo ID

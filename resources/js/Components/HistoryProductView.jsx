@@ -12,13 +12,19 @@ const HeaderLayout = () => {
     const cartUrl = '/cart';
     const { props } = usePage();
     const user = props.auth.user;
-    
+    const isAdmin = props.isAdmin;
+
     const navigateTo = (url) => {
         window.location.href = `${window.location.origin}${url}`;
     };
 
     const userMenu = (
         <Menu>
+            {isAdmin && (  // Kiểm tra nếu là admin
+                <Menu.Item key="admin">
+                    <Link href={route('admin.dashboard')}>Quản trị viên</Link>
+                </Menu.Item>
+            )}
             <Menu.Item key="profile">
                 <Link href={route('profile.edit')}>Hồ sơ cá nhân</Link>
             </Menu.Item>

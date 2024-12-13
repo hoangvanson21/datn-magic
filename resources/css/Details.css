@@ -29,3 +29,30 @@
     color: white;
     border: 1px solid #0056b3;
 }
+
+/* Details.css */
+.product-carousel-item img {
+    transition: transform 0.3s ease-in-out;
+}
+
+.product-carousel-item img:hover {
+    transform: scale(1.05);
+}
+
+.product-info .ant-tag {
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.product-info .ant-tag:hover {
+    background-color: #1890ff;
+    color: #fff;
+}
+
+.product-info .ant-btn {
+    transition: transform 0.3s ease;
+}
+
+.product-info .ant-btn:hover {
+    transform: scale(1.05);
+}

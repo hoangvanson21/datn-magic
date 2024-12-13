@@ -55,12 +55,20 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $product->name }}</td>
                     <td class="text-center">
-                        @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" width="80px">
+                        @if($product->images)
+                            @php
+                                $images = json_decode($product->images);  // Giải mã JSON chứa danh sách hình ảnh
+                            @endphp
+                            @if(!empty($images) && isset($images[0]))
+                            <img src="{{ asset('storage/' . $images[0]) }}" alt="{{ $product->name }}" width="80px">
                         @else
-                        <span>Chưa có hình ảnh</span>
+                            <span>Chưa có hình ảnh</span>
                         @endif
+                        @else
+        <span>Chưa có hình ảnh</span>
+    @endif
                     </td>
+                    
                     <td class="text-center">{{ number_format($product->price, 2) }} VNĐ</td>
                     <td class="text-center">{{ $product->quantity }}</td>
                     <td class="text-center">

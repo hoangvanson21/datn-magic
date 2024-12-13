@@ -48,4 +48,8 @@ class User extends Authenticatable
             'verification_code' => 'string',
         ];
     }
+    public function address()
+    {
+        return $this->hasOne(Address::class);
+    }
 }

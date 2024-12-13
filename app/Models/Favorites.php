@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Favorites extends Model
 {
     // Specify the table name if it does not follow the convention
-    protected $table = "favorites";
+    protected $table = "wish_list";
 
     // Allow mass assignment for specific fields
     protected $fillable = ['user_id', 'product_id'];

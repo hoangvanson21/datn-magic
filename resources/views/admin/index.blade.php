@@ -1,214 +1,88 @@
 @extends('admin.main_admin')
 
-@section('title', 'Trang chủ')
+@section('title', 'Thống kê quản trị')
 
 @section('content')
-<div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card">
+<style>
+    .hover\:bg-blue-600:hover {
+    background-color: #2563eb;
+}
 
-                    <div class="header">
-                        <h4 class="title">Email Statistics</h4>
-                        <p class="category">Last Campaign Performance</p>
-                    </div>
-                    <div class="content">
-                        <div id="chartPreferences" class="ct-chart ct-perfect-fourth"></div>
+.hover\:bg-green-600:hover {
+    background-color: #16a34a;
+}
 
-                        <div class="footer">
-                            <div class="legend">
-                                <i class="fa fa-circle text-info"></i> Open
-                                <i class="fa fa-circle text-danger"></i> Bounce
-                                <i class="fa fa-circle text-warning"></i> Unsubscribe
-                            </div>
-                            <hr>
-                            <div class="stats">
-                                <i class="fa fa-clock-o"></i> Campaign sent 2 days ago
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+.hover\:bg-yellow-600:hover {
+    background-color: #d97706;
+}
 
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="header">
-                        <h4 class="title">Users Behavior</h4>
-                        <p class="category">24 Hours performance</p>
-                    </div>
-                    <div class="content">
-                        <div id="chartHours" class="ct-chart"></div>
-                        <div class="footer">
-                            <div class="legend">
-                                <i class="fa fa-circle text-info"></i> Open
-                                <i class="fa fa-circle text-danger"></i> Click
-                                <i class="fa fa-circle text-warning"></i> Click Second Time
-                            </div>
-                            <hr>
-                            <div class="stats">
-                                <i class="fa fa-history"></i> Updated 3 minutes ago
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+.hover\:bg-red-600:hover {
+    background-color: #dc2626;
+}
 
+.hover\:bg-gray-700:hover {
+    background-color: #374151;
+}
 
+.hover\:bg-purple-600:hover {
+    background-color: #7c3aed;
+}
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card ">
-                    <div class="header">
-                        <h4 class="title">2014 Sales</h4>
-                        <p class="category">All products including Taxes</p>
-                    </div>
-                    <div class="content">
-                        <div id="chartActivity" class="ct-chart"></div>
+.hover\:bg-indigo-600:hover {
+    background-color: #4f46e5;
+}
 
-                        <div class="footer">
-                            <div class="legend">
-                                <i class="fa fa-circle text-info"></i> Tesla Model S
-                                <i class="fa fa-circle text-danger"></i> BMW 5 Series
-                            </div>
-                            <hr>
-                            <div class="stats">
-                                <i class="fa fa-check"></i> Data information certified
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</style>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <!-- Tổng số người dùng -->
+    <a href="{{ route('admin.users.index') }}" class="bg-blue-500 text-white p-4 rounded-lg shadow-md block hover:bg-blue-600 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ $totalUser }}</h3>
+        <p>Người dùng</p>
+    </a>
 
-            <div class="col-md-6">
-                <div class="card ">
-                    <div class="header">
-                        <h4 class="title">Tasks</h4>
-                        <p class="category">Backend development</p>
-                    </div>
-                    <div class="content">
-                        <div class="table-full-width">
-                            <table class="table">
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox">
-                                                    <input id="checkbox1" type="checkbox">
-                                                    <label for="checkbox1"></label>
-                                                </div>
-                                        </td>
-                                        <td>Sign contract for "What are conference organizers afraid of?"</td>
-                                        <td class="td-actions text-right">
-                                            <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-xs">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-xs">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox">
-                                                    <input id="checkbox2" type="checkbox" checked>
-                                                    <label for="checkbox2"></label>
-                                                </div>
-                                        </td>
-                                        <td>Lines From Great Russian Literature? Or E-mails From My Boss?</td>
-                                        <td class="td-actions text-right">
-                                            <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-xs">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-xs">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox">
-                                                    <input id="checkbox3" type="checkbox">
-                                                    <label for="checkbox3"></label>
-                                                </div>
-                                        </td>
-                                        <td>Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit
-                                        </td>
-                                        <td class="td-actions text-right">
-                                            <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-xs">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-xs">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox">
-                                                    <input id="checkbox4" type="checkbox" checked>
-                                                    <label for="checkbox4"></label>
-                                                </div>
-                                        </td>
-                                        <td>Create 4 Invisible User Experiences you Never Knew About</td>
-                                        <td class="td-actions text-right">
-                                            <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-xs">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-xs">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox">
-                                                    <input id="checkbox5" type="checkbox">
-                                                    <label for="checkbox5"></label>
-                                                </div>
-                                        </td>
-                                        <td>Read "Following makes Medium better"</td>
-                                        <td class="td-actions text-right">
-                                            <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-xs">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-xs">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="checkbox">
-                                                    <input id="checkbox6" type="checkbox" checked>
-                                                    <label for="checkbox6"></label>
-                                                </div>
-                                        </td>
-                                        <td>Unfollow 5 enemies from twitter</td>
-                                        <td class="td-actions text-right">
-                                            <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-xs">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-xs">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+    <!-- Tổng số sản phẩm -->
+    <a href="{{ route('admin.products.index') }}" class="bg-green-500 text-white p-4 rounded-lg shadow-md block hover:bg-green-600 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ $totalProduct }}</h3>
+        <p>Sản phẩm</p>
+    </a>
 
-                        <div class="footer">
-                            <hr>
-                            <div class="stats">
-                                <i class="fa fa-history"></i> Updated 3 minutes ago
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Tổng số đơn hàng -->
+    <a href="{{ route('admin.orders.index') }}" class="bg-blue-400 text-white p-4 rounded-lg shadow-md block hover:bg-blue-500 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ $totalOrder }}</h3>
+        <p>Đơn hàng</p>
+    </a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Tổng danh mục -->
+    <a href="{{ route('admin.categories.index') }}" class="bg-yellow-500 text-white p-4 rounded-lg shadow-md block hover:bg-yellow-600 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ $totalCategory }}</h3>
+        <p>Danh mục</p>
+    </a>
+
+    <!-- Tổng doanh thu -->
+    <a href="#" class="bg-red-500 text-white p-4 rounded-lg shadow-md block hover:bg-red-600 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ number_format($totalPrice, 0, ',', '.') }} VNĐ</h3>
+        <p>Doanh thu</p>
+    </a>
+
+    <!-- Tổng lượt đánh giá -->
+    <a href="{{ route('admin.reviews.index') }}" class="bg-gray-600 text-white p-4 rounded-lg shadow-md block hover:bg-gray-700 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ $totalReview }}</h3>
+        <p>Lượt đánh giá</p>
+    </a>
+
+    <!-- Tổng thương hiệu -->
+    <a href="{{ route('admin.brands.index') }}" class="bg-purple-500 text-white p-4 rounded-lg shadow-md block hover:bg-purple-600 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ $totalBrand }}</h3>
+        <p>Thương hiệu</p>
+    </a>
+
+    <!-- Tổng lượt xem -->
+    <a href="#" class="bg-indigo-500 text-white p-4 rounded-lg shadow-md block hover:bg-indigo-600 transition duration-300 ease-in-out">
+        <h3 class="text-2xl">{{ $totalView }}</h3>
+        <p>Tổng lượt xem sản phẩm</p>
+    </a>
 </div>
 
 @endsection

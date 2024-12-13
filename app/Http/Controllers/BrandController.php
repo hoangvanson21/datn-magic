@@ -45,6 +45,13 @@ class BrandController extends Controller
         $request->validate([
             'name' => 'required|string|max:225',
             'description' => 'required|string|max:255',
+        ], [
+            'name.required' => 'Tên thương hiệu là bắt buộc.',
+            'name.string' => 'Tên thương hiệu phải là chuỗi ký tự.',
+            'name.max' => 'Tên thương hiệu không được vượt quá 225 ký tự.',
+            'description.required' => 'Mô tả thương hiệu là bắt buộc.',
+            'description.string' => 'Mô tả thương hiệu phải là chuỗi ký tự.',
+            'description.max' => 'Mô tả thương hiệu không được vượt quá 255 ký tự.',
         ]);
 
         $data = $request->all();

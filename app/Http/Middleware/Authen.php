@@ -17,7 +17,7 @@ class Authen
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
-            
+
             if (Auth::user()->status == 'admin') {
                 return $next($request);
             } else {

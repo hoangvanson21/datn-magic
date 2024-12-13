@@ -1,82 +1,76 @@
-
 @extends('admin.main_admin')
 
-@section('title', 'Danh sách bình luận')
+@section('title', 'Danh sách Danh Mục')
 
 @section('content')
-<div class="container mx-auto mt-10">
-    <h2 class="text-2xl font-bold mb-4 text-center">DANH SÁCH BÌNH LUẬN</h2>
+<div class="container-fluid mt-4">
+    <h2 class="text-xxl font-bold mb-4 text-center">DANH SÁCH DANH MỤC</h2>
 
-    <!-- Thêm nút Thêm bình luận -->
-    <div class="mb-4 flex justify-between items-center">
-        <a href="{{ route('admin.reviews.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition" style="visibility: hidden" >Thêm bình luận</a>
+    <!-- Nút thêm và thùng rác -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Thêm Danh Mục
+            </a>
+           
+        </div>
 
-        <!-- Ô tìm kiếm -->
-        <div>
-            <form action="{{ route('admin.reviews.index') }}" method="GET">
-                <input type="text" name="search" placeholder="Tìm kiếm bình luận" class="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" value="{{ request()->get('search') }}">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Tìm kiếm</button>
+        <!-- Form tìm kiếm -->
+        <div class="col-md-6">
+            <form action="{{ route('admin.categories.index') }}" method="GET" class="d-flex justify-content-end" style="display: flex">
+                <input type="text" name="search" placeholder="Tìm kiếm danh mục" class="form-control me-2" value="{{ request()->get('search') }}">
+                <button type="submit" class="btn btn-info">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
             </form>
         </div>
     </div>
+
     @if(session('search'))
-    <div class="flex justify-end mb-4">
+    <div class="alert alert-info text-end">
         Tìm thấy {{ session('search') }} kết quả
     </div>
-@endif
-    <!-- Bảng bình luận -->
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">STT</th>
-                    <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Người bình luận</th>
-                    <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Bình luận</th>
-                    <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ngày tạo</th>
-                    <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
-                    <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Hành động</th>
+    @endif
+
+    <!-- Bảng danh sách danh mục -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr class="text-center fw-bold">
+                    <th>STT</th>
+                    <th>Người dùng</th>
+                    <th>Bình luận</th>
+                    <th>Ngày Tạo</th>
+                    <th>Trạng thái</th>
+                    <th>Hành Động</th>
                 </tr>
             </thead>
-            <tbody class="text-sm font-medium text-gray-700">
+            <tbody>
                 @foreach($reviews as $review)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 border-b border-gray-200">{{ $loop->iteration }}</td>
-                    <td class="px-6 py-4 border-b border-gray-200">{{ $review->user->name }}</td>
-                    <td class="px-6 py-4 border-b border-gray-200">{{ $review->review_text }}</td>
-                    <td class="px-6 py-4 border-b border-gray-200">{{ $review->created_at->format('d/m/Y') }}</td>
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td>{{ $review->user->name }}</td>
+                    <td>{{ $review->review_text }}</td>
+                    <td class="text-center">{{ $review->created_at->format('d/m/Y') }}</td>
                     <td class="px-6 py-4 border-b border-gray-200">
-                        @if($review->status == 1)
+                        @if($review->status == 0)
                             <span class="text-green-500">Hiện</span>
                         @else
                             <span class="text-red-500">Ẩn</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 border-b border-gray-200">
-                        <a href="{{ route('admin.reviews.edit', $review->id) }}" class="text-blue-500 hover:underline">Sửa</a>
-                        <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST" class="inline-block ml-4">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:underline">Xóa</button>
-                        </form>
-                      
+                    <td class="d-flex justify-content-center" style="display: flex">
+                        <a href="{{ route('admin.reviews.edit', $review->id) }}" class="btn btn-sm btn-warning me-2">
+                            <i class="fas fa-edit"></i> Sửa
+                        </a>
                     </td>
                 </tr>
-                
                 @endforeach
-                @if($reviews->isEmpty())
-                <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">Không có bình luận nào.</td>
-                </tr>
-                @endif
+
+              
             </tbody>
         </table>
     </div>
 
-    {{-- <!-- Phân trang -->
-    <div class="mt-4">
-        {{ $reviews->links() }}
-    </div> --}}
 </div>
-<br>
-<br>
 @endsection
